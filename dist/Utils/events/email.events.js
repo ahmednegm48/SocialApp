@@ -14,3 +14,12 @@ exports.emailEvents.on("confirmEmail", async (data) => {
         console.error("Failed to send Email", err);
     }
 });
+exports.emailEvents.on("forgetPassword", async (data) => {
+    try {
+        data.html = (0, email_template_1.emailTemplate)(data.otp);
+        await (0, send_email_1.sendEmail)(data);
+    }
+    catch (err) {
+        console.error("Failed to send Email", err);
+    }
+});

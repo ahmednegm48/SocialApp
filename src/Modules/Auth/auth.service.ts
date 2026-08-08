@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IConfirmEmailDTO, ILoginDTO, ISignupDTO } from "./auth.dto";
+import { IConfirmEmailDTO, IForgetPasswordDTO, ILoginDTO, IResetPasswordDTO, ISignupDTO } from "./auth.dto";
 import { UserModel } from "../../DB/Models/user.model";
 import {
   BadRequestException,
@@ -79,6 +79,31 @@ class AuthService {
     const credentials = createLoginCredentials(user);
 
     return res.status(200).json({ message: "Logged in Successfully" , credentials});
+  };
+
+  forgetPassword = async (req: Request, res: Response): Promise<Response> => {
+    const { email }: IForgetPasswordDTO = req.body;
+    const otp = generateOTP();
+    const hashedPassword = await generateHash(otp);
+    const user = await UserModel.findOneAndUpdate({email},{resetPasswordOTP:hashedPassword});
+    if (!user) throw new NotFoundException("Invalid email");
+    emailEvents.emit("forgetPassword", {
+      to: email,
+      otp,
+    });
+    return res.status(200).json({ message: "OTP has been sent to your email"});
+  };
+
+  resetPassword = async (req: Request, res: Response): Promise<Response> => {
+    const { email , otp , password }: IResetPasswordDTO = req.body;
+    const user = await UserModel.findOne({email , resetPasswordOTP:{$exists:true}});
+    if (!user || !user.resetPasswordOTP) throw new NotFoundException("Invalid email");
+    const isMatch = await compareHash(otp,user.resetPasswordOTP);
+    if(!isMatch) throw new BadRequestException("Invalid OTP");
+    const hashedPassword = await generateHash(password);
+    await UserModel.updateOne({email},{password:hashedPassword,$unset:{resetPasswordOTP:true}})
+    
+    return res.status(200).json({ message: "Password Reset Successfully"});
   };
 }
 

@@ -16,3 +16,11 @@ emailEvents.on("confirmEmail", async (data:IEmail)=>{
         console.error("Failed to send Email",err)
     }
 })
+emailEvents.on("forgetPassword", async (data:IEmail)=>{
+    try{
+        data.html = emailTemplate(data.otp);
+        await sendEmail(data)
+    }catch(err){
+        console.error("Failed to send Email",err)
+    }
+})

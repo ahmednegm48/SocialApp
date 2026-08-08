@@ -44,4 +44,6 @@ const router = (0, express_1.Router)();
 router.post("/signup", (0, validation_middleware_1.validation)(validators.signupSchema), auth_service_1.default.signup);
 router.post("/login", (0, validation_middleware_1.validation)(validators.loginSchema), auth_service_1.default.login);
 router.patch("/confirm-email", (0, validation_middleware_1.validation)(validators.confirmEmailSchema), auth_service_1.default.confirmEmail);
+router.patch("/forget-password", (0, validation_middleware_1.validation)(validators.forgetPasswordSchema), auth_service_1.default.forgetPassword);
+router.patch("/reset-password", (0, validation_middleware_1.validation)(validators.resetPasswordSchema), auth_service_1.default.resetPassword);
 exports.default = router;

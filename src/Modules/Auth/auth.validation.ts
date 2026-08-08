@@ -17,8 +17,40 @@ export const confirmEmailSchema = {
   }),
 };
 
+export const forgetPasswordSchema = {
+  body: z.strictObject({
+    email: z.email({ error: "Invalid email address" }),
+  }),
+};
+
+export const resetPasswordSchema = {
+  body: z
+    .strictObject({
+      email: z.email({ error: "Invalid email address" }),
+      otp: z.string().regex(/^\d{6}$/),
+      password: z
+        .string({ error: "Password is required" })
+        .min(8, { error: "Password must be at least 8 characters long" })
+        .max(64, { error: "Password must be at most 64 characters long" }),
+      confirmPassword: z
+        .string({ error: "Password is required" })
+        .min(8, { error: "Password must be at least 8 characters long" })
+        .max(64, { error: "Password must be at most 64 characters long" }),
+    })
+    .superRefine((data, ctx) => {
+      if (data.password !== data.confirmPassword) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["confirmPassword"],
+          message: "Passwords do not match",
+        });
+      }
+    }),
+};
+
 export const signupSchema = {
-  body: loginSchema.body.extend({
+  body: loginSchema.body
+    .extend({
       firstname: z.string(),
       lastname: z.string(),
       username: z
@@ -29,13 +61,14 @@ export const signupSchema = {
         .string({ error: "Password is required" })
         .min(8, { error: "Password must be at least 8 characters long" })
         .max(64, { error: "Password must be at most 64 characters long" }),
-    }).superRefine((data, ctx) => {
-    if(data.password !== data.confirmPassword){
+    })
+    .superRefine((data, ctx) => {
+      if (data.password !== data.confirmPassword) {
         ctx.addIssue({
-            code:"custom",
-            path:["confirmPassword"],
-            message:"Passwords do not match"
-        })
-    }
-  }),
+          code: "custom",
+          path: ["confirmPassword"],
+          message: "Passwords do not match",
+        });
+      }
+    }),
 };

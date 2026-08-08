@@ -5,7 +5,7 @@ import { BadRequestException } from "../Utils/response/error.response";
 //"body" | "query" | "params" | "headers" | "files" | "file"
 type KeyReqType = keyof Request;
 type SchemaType = Partial<Record<KeyReqType, ZodType>>;
-export const validation = (schema: any) => {
+export const validation = (schema: SchemaType) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const validationErrors: Array<{
       key: KeyReqType;

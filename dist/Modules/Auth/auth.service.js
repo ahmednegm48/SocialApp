@@ -61,5 +61,30 @@ class AuthService {
         const credentials = (0, token_1.createLoginCredentials)(user);
         return res.status(200).json({ message: "Logged in Successfully", credentials });
     };
+    forgetPassword = async (req, res) => {
+        const { email } = req.body;
+        const otp = (0, generateOTP_1.generateOTP)();
+        const hashedPassword = await (0, hash_1.generateHash)(otp);
+        const user = await user_model_1.UserModel.findOneAndUpdate({ email }, { resetPasswordOTP: hashedPassword });
+        if (!user)
+            throw new error_response_1.NotFoundException("Invalid email");
+        email_events_1.emailEvents.emit("forgetPassword", {
+            to: email,
+            otp,
+        });
+        return res.status(200).json({ message: "OTP has been sent to your email" });
+    };
+    resetPassword = async (req, res) => {
+        const { email, otp, password } = req.body;
+        const user = await user_model_1.UserModel.findOne({ email, resetPasswordOTP: { $exists: true } });
+        if (!user || !user.resetPasswordOTP)
+            throw new error_response_1.NotFoundException("Invalid email");
+        const isMatch = await (0, hash_1.compareHash)(otp, user.resetPasswordOTP);
+        if (!isMatch)
+            throw new error_response_1.BadRequestException("Invalid OTP");
+        const hashedPassword = await (0, hash_1.generateHash)(password);
+        await user_model_1.UserModel.updateOne({ email }, { password: hashedPassword, $unset: { resetPasswordOTP: true } });
+        return res.status(200).json({ message: "Password Reset Successfully" });
+    };
 }
 exports.default = new AuthService();

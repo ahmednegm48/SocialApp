@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.signupSchema = exports.confirmEmailSchema = exports.loginSchema = void 0;
+exports.signupSchema = exports.resetPasswordSchema = exports.forgetPasswordSchema = exports.confirmEmailSchema = exports.loginSchema = void 0;
 const zod_1 = require("zod");
 exports.loginSchema = {
     body: zod_1.z.strictObject({
@@ -17,8 +17,38 @@ exports.confirmEmailSchema = {
         otp: zod_1.z.string().regex(/^\d{6}$/),
     }),
 };
+exports.forgetPasswordSchema = {
+    body: zod_1.z.strictObject({
+        email: zod_1.z.email({ error: "Invalid email address" }),
+    }),
+};
+exports.resetPasswordSchema = {
+    body: zod_1.z
+        .strictObject({
+        email: zod_1.z.email({ error: "Invalid email address" }),
+        otp: zod_1.z.string().regex(/^\d{6}$/),
+        password: zod_1.z
+            .string({ error: "Password is required" })
+            .min(8, { error: "Password must be at least 8 characters long" })
+            .max(64, { error: "Password must be at most 64 characters long" }),
+        confirmPassword: zod_1.z
+            .string({ error: "Password is required" })
+            .min(8, { error: "Password must be at least 8 characters long" })
+            .max(64, { error: "Password must be at most 64 characters long" }),
+    })
+        .superRefine((data, ctx) => {
+        if (data.password !== data.confirmPassword) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["confirmPassword"],
+                message: "Passwords do not match",
+            });
+        }
+    }),
+};
 exports.signupSchema = {
-    body: exports.loginSchema.body.extend({
+    body: exports.loginSchema.body
+        .extend({
         firstname: zod_1.z.string(),
         lastname: zod_1.z.string(),
         username: zod_1.z
@@ -29,12 +59,13 @@ exports.signupSchema = {
             .string({ error: "Password is required" })
             .min(8, { error: "Password must be at least 8 characters long" })
             .max(64, { error: "Password must be at most 64 characters long" }),
-    }).superRefine((data, ctx) => {
+    })
+        .superRefine((data, ctx) => {
         if (data.password !== data.confirmPassword) {
             ctx.addIssue({
                 code: "custom",
                 path: ["confirmPassword"],
-                message: "Passwords do not match"
+                message: "Passwords do not match",
             });
         }
     }),
