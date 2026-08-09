@@ -10,6 +10,7 @@ import {
 } from "./Utils/response/error.response";
 import connectDB from "./DB/connection";
 import authController from "./Modules/Auth/auth.controller"
+import postController from "./Modules/Post/post.controller";
 // import { HUserDocument, UserModel } from "./DB/Models/user.model";
 
 const limitter: RateLimitRequestHandler = rateLimit({
@@ -35,14 +36,7 @@ export const bootStrap = async (): Promise<void> => {
     return res.status(200).json({ message: "Welcome to Social App" });
   });
   app.use("/auth",authController);
-
-  // const user:HUserDocument = await new UserModel({
-  //   firstName:"ahmed",
-  //   lastName:"negm",
-  //   email:"ahmednegm@gmail.com",
-  //   password:"wala"
-  // });
-  // user.save()
+  app.use("/posts",postController);
 
   app.use((req: Request, res: Response) => {
     throw new NotFoundException("Route not found");
