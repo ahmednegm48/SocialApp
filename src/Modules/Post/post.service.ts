@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ICreatePostDTO, ITogglePostDTO } from "./post.dto";
+import { ICreatePostDTO, IPostIdParamsDTO, IUpdatePostDTO } from "./post.dto";
 import {
   BadRequestException,
   NotFoundException,
@@ -26,7 +26,7 @@ class PostService {
   };
 
   toggleLike = async (req: Request, res: Response): Promise<Response> => {
-    const { postId }: ITogglePostDTO = req.params as { postId: string };
+    const { postId }: IPostIdParamsDTO = req.params as { postId: string };
     const userId = req.user!._id;
 
     const post = await PostModel.findOne({
@@ -40,17 +40,67 @@ class PostService {
       alreadyLiked
         ? { $pull: { likes: userId } }
         : { $addToSet: { likes: userId } },
-        {returnDocument: 'after'}
+      { returnDocument: "after" },
     );
 
-    return res
-      .status(201)
-      .json({
-        message: alreadyLiked
-          ? "Like Removed Successfully"
-          : " Post Liked Successfully ",
-        data: updated,
-      });
+    return res.status(201).json({
+      message: alreadyLiked
+        ? "Like Removed Successfully"
+        : " Post Liked Successfully ",
+      data: updated,
+    });
+  };
+
+  updatePost = async (req: Request, res: Response): Promise<Response> => {
+    const { postId }: IPostIdParamsDTO = req.params as { postId: string };
+    const { content }: IUpdatePostDTO = req.body;
+
+    const post = await PostModel.findOneAndUpdate(
+      {
+        _id: postId,
+        createdBy: req.user!._id,
+      },
+      {
+        content,
+        $inc: { __v: 1 },
+      },
+      { returnDocument: "after" },
+    );
+    if (!post) throw new NotFoundException("Post Is Not Found");
+
+    return res.status(201).json({
+      message: " Post Updated Successfully ",
+      data: post,
+    });
+  };
+
+  deletePost = async (req: Request, res: Response): Promise<Response> => {
+    const { postId }: IPostIdParamsDTO = req.params as { postId: string };
+
+    const post = await PostModel.findOneAndDelete({
+      _id: postId,
+      createdBy: req.user!._id,
+    });
+    if (!post) throw new NotFoundException("Post Is Not Found");
+
+    return res.status(201).json({
+      message: " Post Deleted Successfully ",
+    });
+  };
+
+  getPost = async (req: Request, res: Response): Promise<Response> => {
+    const { postId }: IPostIdParamsDTO = req.params as { postId: string };
+
+    const post = await PostModel.findOne({
+      _id: postId,
+      freezedAt:{$exists:false},
+    }).populate("createdBy","firstname lastname  email -_id").lean();
+    if (!post) throw new NotFoundException("Post Is Not Found");
+
+    return res.status(201).json({
+      message: " Post Retreived Successfully ",
+      data: post,
+    });
   };
 }
 

@@ -11,6 +11,7 @@ import {
 import connectDB from "./DB/connection";
 import authController from "./Modules/Auth/auth.controller"
 import postController from "./Modules/Post/post.controller";
+import userController from "./Modules/User/user.controller"
 // import { HUserDocument, UserModel } from "./DB/Models/user.model";
 
 const limitter: RateLimitRequestHandler = rateLimit({
@@ -37,6 +38,7 @@ export const bootStrap = async (): Promise<void> => {
   });
   app.use("/auth",authController);
   app.use("/posts",postController);
+  app.use("/users",userController);
 
   app.use((req: Request, res: Response) => {
     throw new NotFoundException("Route not found");

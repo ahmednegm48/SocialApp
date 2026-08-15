@@ -39,7 +39,7 @@ const getSignature = (type, role) => {
     return { Secret, Expiration };
 };
 const createLoginCredentials = (user) => {
-    const payload = { _id: user._id.toString(), role: user.role };
+    const payload = { _id: user._id.toString() };
     const access = getSignature(TokenEnum.ACCESS, user.role);
     const refresh = getSignature(TokenEnum.REFRESH, user.role);
     const accessToken = (0, exports.generateToken)({

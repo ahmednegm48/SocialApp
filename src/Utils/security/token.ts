@@ -14,7 +14,6 @@ export enum TokenEnum {
 
 export interface ITokenPayload extends JwtPayload {
   _id: string;
-  role: RoleEnum;
 }
 
 export const generateToken = ({
@@ -67,7 +66,7 @@ const getSignature = (
 export const createLoginCredentials = (
   user: HUserDocument,
 ): { accessToken: string; refreshToken: string } => {
-  const payload = { _id: user._id.toString(), role: user.role };
+  const payload = { _id: user._id.toString()};
   const access = getSignature(TokenEnum.ACCESS, user.role);
   const refresh = getSignature(TokenEnum.REFRESH, user.role);
 

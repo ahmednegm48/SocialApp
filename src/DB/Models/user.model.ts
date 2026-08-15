@@ -15,6 +15,8 @@ export interface IUser {
   address?: string;
   gender: GenderEnum;
   role: RoleEnum;
+  friends?: Types.ObjectId[];
+  blockedUsers?: Types.ObjectId[];
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -46,6 +48,8 @@ export const UserSchema = new Schema<IUser>(
       enum: Object.values(RoleEnum),
       default: RoleEnum.USER,
     },
+    friends: [{ type: Schema.Types.ObjectId, ref: "User"}],
+    blockedUsers: [{ type: Schema.Types.ObjectId, ref: "User"}],
   },
   {
     timestamps: true,

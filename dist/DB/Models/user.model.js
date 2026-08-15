@@ -29,6 +29,8 @@ exports.UserSchema = new mongoose_1.Schema({
         enum: Object.values(user_enum_1.RoleEnum),
         default: user_enum_1.RoleEnum.USER,
     },
+    friends: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
+    blockedUsers: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
 }, {
     timestamps: true,
     toObject: { virtuals: true },

@@ -22,10 +22,28 @@ router.post(
   PostService.createPost
 );
 
+router.get(
+  "/:postId",
+  validation(validators.postIdParamsSchema),
+  PostService.getPost
+);
+
 router.patch(
   "/:postId/like",
   validation(validators.postIdParamsSchema),
   PostService.toggleLike
+);
+
+router.patch(
+  "/:postId/update",
+  validation(validators.upadtePostSchema),
+  PostService.updatePost
+);
+
+router.delete(
+  "/:postId/delete",
+  validation(validators.postIdParamsSchema),
+  PostService.updatePost
 );
 
 export default router;

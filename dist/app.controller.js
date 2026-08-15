@@ -14,6 +14,7 @@ const error_response_1 = require("./Utils/response/error.response");
 const connection_1 = __importDefault(require("./DB/connection"));
 const auth_controller_1 = __importDefault(require("./Modules/Auth/auth.controller"));
 const post_controller_1 = __importDefault(require("./Modules/Post/post.controller"));
+const user_controller_1 = __importDefault(require("./Modules/User/user.controller"));
 // import { HUserDocument, UserModel } from "./DB/Models/user.model";
 const limitter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -35,6 +36,7 @@ const bootStrap = async () => {
     });
     app.use("/auth", auth_controller_1.default);
     app.use("/posts", post_controller_1.default);
+    app.use("/users", user_controller_1.default);
     app.use((req, res) => {
         throw new error_response_1.NotFoundException("Route not found");
     });

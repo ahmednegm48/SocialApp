@@ -1,6 +1,7 @@
 import {z} from "zod";
-import { createPostSchema, postIdParamsSchema } from "./post.validation";
+import { createPostSchema, postIdParamsSchema, upadtePostSchema } from "./post.validation";
 
 
 export type ICreatePostDTO = z.infer<typeof createPostSchema.body>;
-export type ITogglePostDTO = z.infer<typeof postIdParamsSchema.params>;
+export type IPostIdParamsDTO = z.infer<typeof postIdParamsSchema.params>;
+export type IUpdatePostDTO = z.infer<typeof upadtePostSchema.body>;
