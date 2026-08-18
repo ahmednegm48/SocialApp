@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const error_response_1 = require("../../Utils/response/error.response");
 const post_model_1 = require("../../DB/Models/post.model");
-const comment_model_1 = require("../../DB/Models/comment.model");
 class PostService {
     constructor() { }
     createPost = async (req, res) => {
@@ -73,70 +72,12 @@ class PostService {
         const post = await post_model_1.PostModel.findOne({
             _id: postId,
             freezedAt: { $exists: false },
-        })
-            .populate("createdBy", "firstname lastname  email -_id")
-            .lean();
+        }).populate("createdBy", "firstname lastname  email -_id").lean();
         if (!post)
             throw new error_response_1.NotFoundException("Post Is Not Found");
         return res.status(201).json({
             message: " Post Retreived Successfully ",
             data: post,
-        });
-    };
-    createComments = async (req, res) => {
-        const { postId } = req.params;
-        const { content, parentId } = req.body;
-        const post = await post_model_1.PostModel.findOne({
-            _id: postId,
-            freezedAt: { $exists: false },
-        });
-        console.log(postId);
-        if (!post)
-            throw new error_response_1.NotFoundException("post not found");
-        if (parentId) {
-            const parent = await comment_model_1.CommentModel.findOne({ _id: parentId, postId });
-            if (!parent)
-                throw new error_response_1.NotFoundException("Parent comment is not exists");
-        }
-        const comment = await comment_model_1.CommentModel.create({
-            postId,
-            ...(parentId && { parentId }),
-            content,
-            createdBy: req.user._id,
-        });
-        return res.status(201).json({
-            message: " Comment Added Successfully ",
-            data: { comment },
-        });
-    };
-    updateComments = async (req, res) => {
-        const { commentId } = req.params;
-        const { content } = req.body;
-        const comment = await comment_model_1.CommentModel.findOneAndUpdate({ _id: commentId, createdBy: req.user._id }, { content }, { returnDocument: "after" });
-        if (!comment)
-            throw new error_response_1.ForbiddenException("not found comment or you are not the author");
-        return res.status(200).json({
-            message: " Comment Updated Successfully ",
-            data: { comment },
-        });
-    };
-    deleteComments = async (req, res) => {
-        const { commentId } = req.params;
-        const userId = req.user._id;
-        const comment = await comment_model_1.CommentModel.findById(commentId);
-        if (!comment)
-            throw new error_response_1.NotFoundException("comment not found");
-        const post = await post_model_1.PostModel.findById(comment.postId);
-        const isCommentAuthor = comment.createdBy.equals(userId);
-        const isPostAuthor = post?.createdBy.equals(userId);
-        if (!isCommentAuthor && !isPostAuthor)
-            throw new error_response_1.ForbiddenException("not allowed to detele this comment");
-        await Promise.all([
-            comment_model_1.CommentModel.deleteOne({ _id: commentId }),
-            comment_model_1.CommentModel.deleteMany({ parentId: commentId }),
-        ]);
-        return res.status(201).json({
-            message: " Comment deleted Successfully ",
         });
     };
 }

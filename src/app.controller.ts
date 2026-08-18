@@ -9,10 +9,10 @@ import {
   NotFoundException,
 } from "./Utils/response/error.response";
 import connectDB from "./DB/connection";
-import authController from "./Modules/Auth/auth.controller"
+import authController from "./Modules/Auth/auth.controller";
 import postController from "./Modules/Post/post.controller";
-import userController from "./Modules/User/user.controller"
-// import { HUserDocument, UserModel } from "./DB/Models/user.model";
+import userController from "./Modules/User/user.controller";
+import commentController from "./Modules/Comment/comment.controller"
 
 const limitter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -32,13 +32,13 @@ export const bootStrap = async (): Promise<void> => {
   app.use(express.json());
   await connectDB();
 
-
   app.get("/", (req: Request, res: Response) => {
     return res.status(200).json({ message: "Welcome to Social App" });
   });
-  app.use("/auth",authController);
-  app.use("/posts",postController);
-  app.use("/users",userController);
+  app.use("/auth", authController);
+  app.use("/posts", postController);
+  app.use("/users", userController);
+  app.use("/comments", commentController);
 
   app.use((req: Request, res: Response) => {
     throw new NotFoundException("Route not found");

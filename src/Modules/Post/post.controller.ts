@@ -4,6 +4,7 @@ import {
   fileValidation,
   localFileUpload,
 } from "../../Utils/multer/local.multer";
+import postService from "./post.service";
 import PostService from "./post.service";
 import * as validators from "./post.validation";
 import { Router } from "express";
@@ -19,31 +20,49 @@ router.post(
     20,
   ),
   validation(validators.createPostSchema),
-  PostService.createPost
+  PostService.createPost,
 );
 
 router.get(
   "/:postId",
   validation(validators.postIdParamsSchema),
-  PostService.getPost
+  PostService.getPost,
 );
 
 router.patch(
   "/:postId/like",
   validation(validators.postIdParamsSchema),
-  PostService.toggleLike
+  PostService.toggleLike,
 );
 
 router.patch(
   "/:postId/update",
   validation(validators.upadtePostSchema),
-  PostService.updatePost
+  PostService.updatePost,
 );
 
 router.delete(
   "/:postId/delete",
   validation(validators.postIdParamsSchema),
-  PostService.updatePost
+  PostService.updatePost,
+);
+
+router.post(
+  "/:postId/comment",
+  validation(validators.createCommentSchema),
+  postService.createComments,
+);
+
+router.patch(
+  "/comment/:commentId/update",
+  validation(validators.updateCommentSchema),
+  postService.updateComments,
+);
+
+router.delete(
+  "/comment/:commentId/delete",
+  validation(validators.CommentIdParamsSchema),
+  postService.deleteComments,
 );
 
 export default router;
