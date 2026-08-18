@@ -12,7 +12,6 @@ import connectDB from "./DB/connection";
 import authController from "./Modules/Auth/auth.controller";
 import postController from "./Modules/Post/post.controller";
 import userController from "./Modules/User/user.controller";
-import commentController from "./Modules/Comment/comment.controller"
 
 const limitter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -38,7 +37,6 @@ export const bootStrap = async (): Promise<void> => {
   app.use("/auth", authController);
   app.use("/posts", postController);
   app.use("/users", userController);
-  app.use("/comments", commentController);
 
   app.use((req: Request, res: Response) => {
     throw new NotFoundException("Route not found");
