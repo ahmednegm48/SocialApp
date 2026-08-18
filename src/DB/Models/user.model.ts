@@ -1,7 +1,6 @@
 import { HydratedDocument, Model, model, Schema, Types } from "mongoose";
 import { GenderEnum, RoleEnum } from "../../Utils/enums/user.enum";
 import { generateHash } from "../../Utils/security/hash";
-import { encrypt } from "../../Utils/security/encryption";
 import { emailEvents } from "../../Utils/events/email.events";
 import { generateOTP } from "../../Utils/security/generateOTP";
 
