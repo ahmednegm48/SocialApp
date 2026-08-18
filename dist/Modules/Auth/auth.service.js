@@ -20,14 +20,10 @@ class AuthService {
                 lastname,
                 username,
                 email,
-                password: await (0, hash_1.generateHash)(password),
+                password,
                 confirmEmailOTP: await (0, hash_1.generateHash)(otp),
             },
         ], { validateBeforeSave: true });
-        email_events_1.emailEvents.emit("confirmEmail", {
-            to: email,
-            otp,
-        });
         return res.status(201).json({ message: "Done", user });
     };
     confirmEmail = async (req, res) => {

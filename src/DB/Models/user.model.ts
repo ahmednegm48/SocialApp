@@ -1,5 +1,9 @@
 import { HydratedDocument, Model, model, Schema, Types } from "mongoose";
 import { GenderEnum, RoleEnum } from "../../Utils/enums/user.enum";
+import { generateHash } from "../../Utils/security/hash";
+import { encrypt } from "../../Utils/security/encryption";
+import { emailEvents } from "../../Utils/events/email.events";
+import { generateOTP } from "../../Utils/security/generateOTP";
 
 export interface IUser {
   _id: Types.ObjectId;
@@ -48,8 +52,8 @@ export const UserSchema = new Schema<IUser>(
       enum: Object.values(RoleEnum),
       default: RoleEnum.USER,
     },
-    friends: [{ type: Schema.Types.ObjectId, ref: "User"}],
-    blockedUsers: [{ type: Schema.Types.ObjectId, ref: "User"}],
+    friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    blockedUsers: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
   {
     timestamps: true,
@@ -74,6 +78,23 @@ UserSchema.virtual("userName")
   .get(function (this: IUser) {
     return `${this.firstname} ${this.lastname}`;
   });
+
+UserSchema.pre(
+  "save",
+  async function (this: HUserDocument & { wasNew: boolean }) {
+    this.wasNew = this.isNew;
+    if (this.isModified("password"))
+      this.password = await generateHash(this.password);
+  },
+);
+
+UserSchema.post("save", async function () {
+  const that = this as HUserDocument & { wasNew: boolean };
+  if(that.wasNew) await emailEvents.emit("confirmEmail", {
+      to: this.email,
+      otp:generateOTP(),
+    });
+});
 
 export const UserModel: Model<IUser> = model<IUser>("User", UserSchema);
 

@@ -27,16 +27,12 @@ class AuthService {
           lastname,
           username,
           email,
-          password: await generateHash(password),
+          password,
           confirmEmailOTP: await generateHash(otp),
         },
       ],
       { validateBeforeSave: true },
     );
-    emailEvents.emit("confirmEmail", {
-      to: email,
-      otp,
-    });
     return res.status(201).json({ message: "Done", user });
   };
 

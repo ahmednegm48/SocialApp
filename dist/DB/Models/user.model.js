@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModel = exports.UserSchema = void 0;
 const mongoose_1 = require("mongoose");
 const user_enum_1 = require("../../Utils/enums/user.enum");
+const hash_1 = require("../../Utils/security/hash");
+const email_events_1 = require("../../Utils/events/email.events");
+const generateOTP_1 = require("../../Utils/security/generateOTP");
 exports.UserSchema = new mongoose_1.Schema({
     firstname: { type: String, required: true, minLength: 2, maxLength: 25 },
     lastname: { type: String, required: true, minLength: 2, maxLength: 25 },
@@ -51,5 +54,18 @@ exports.UserSchema.virtual("userName")
 })
     .get(function () {
     return `${this.firstname} ${this.lastname}`;
+});
+exports.UserSchema.pre("save", async function () {
+    this.wasNew = this.isNew;
+    if (this.isModified("password"))
+        this.password = await (0, hash_1.generateHash)(this.password);
+});
+exports.UserSchema.post("save", async function () {
+    const that = this;
+    if (that.wasNew)
+        await email_events_1.emailEvents.emit("confirmEmail", {
+            to: this.email,
+            otp: (0, generateOTP_1.generateOTP)(),
+        });
 });
 exports.UserModel = (0, mongoose_1.model)("User", exports.UserSchema);
